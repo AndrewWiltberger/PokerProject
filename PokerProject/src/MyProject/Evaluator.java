@@ -1,6 +1,9 @@
 package MyProject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import java.util.Arrays;
 
 public class Evaluator {
@@ -9,6 +12,9 @@ public class Evaluator {
 			"2", "3", "4", "5", "6", "7", "8", "9",
 			"10", "Jack", "Queen", "King", "Ace"
 			};
+	public int tracker = 0;
+	public double player1Wins = 0;
+	public double player2Wins = 0;
 	
 
 	
@@ -34,12 +40,30 @@ public class Evaluator {
 			return ans;			
 		}
 		
+		//will just return the rank of the best hand
+		public int getStrongestHandRank(ArrayList<ArrayList<Integer>> fiveCardHands) {
+			int temp;
+			int maxRank = Integer.MAX_VALUE;
+			int index = 0;
+			for(int i = 0; i < fiveCardHands.size(); i++)
+			{
+				temp = evaluate(fiveCardHands.get(i));
+				if(temp < maxRank) {
+					maxRank = temp;
+					index = i;
+				}
+			}
+			//System.out.println("Best Rank" + maxRank);
+			return maxRank;			
+		}
+		
 		//this will evaluate the rank of 5 cards;
 		public int evaluate(ArrayList<Integer> fiveCards) {
 			if(fiveCards.size() != 5) {
 				System.out.println("Error expecting 5 cards...");
 				return 0;
 			}
+			//printOneHand(fiveCards);
 			Integer c1 = fiveCards.get(0);
 			Integer c2 = fiveCards.get(1);
 			Integer c3 = fiveCards.get(2);
@@ -49,12 +73,15 @@ public class Evaluator {
 			Integer flush = (c1 & c2 & c3 & c4 & c5 & 0xF000); 
 			Integer ans = (c1 | c2 | c3 | c4 | c5) >> 16;
 			//do I have a flush
-			if(flush != 0) {
+			if(flush != 0 ) {
+				//System.out.println("Flush" +table.lookUpFlush(ans));
 				return table.lookUpFlush(ans);
 			}
 			//do I have unique 5 - st8 or high card
 			short s = table.lookUpUnique5(ans);
 			if(s != 0) {
+				//System.out.println("unique5" +s);
+
 				return s;
 			}
 			//other pairs
@@ -63,6 +90,8 @@ public class Evaluator {
 			//search products for ans 
 			int index = Arrays.binarySearch(products, ans);
 			//use the index of ans as the key for values
+			//System.out.println("other" + table.lookUpValues(index));
+
 			return table.lookUpValues(index);
 		}
 		
@@ -119,19 +148,201 @@ public class Evaluator {
 		//community cards in combinations arraylist
 		//uses recusion to generate all combinations
 		//
-		public void generateAllCC(ArrayList<Integer> deck, ArrayList<Integer[]> combinations,
-				Integer cards5[], int start, int end, int index, int target) {
-			if(index == target) {
-				combinations.add(cards5);
+		//deck is remaing cards in deck
+		//https://stackoverflow.com/questions/29910312/algorithm-to-get-all-the-combinations-of-size-n-from-an-array-java
+		//
+		/*
+		public ArrayList<Integer[]> generateAllCC(ArrayList<Integer> deck, int k) {
+			ArrayList<Integer[]> subsets = new ArrayList<Integer[]>();
+			
+			Integer[] s = new Integer[k];
+			//pick first index of combo
+			for(int i = 0; (s[i] = i) < k-1; i++) {
+				
+			}
+			
+			subsets.add(getSubset(deck, s));
+			for(;;) {
+				int i;
+				//find position to inc
+				for(i = k - 1; i >= 0 && s[i] == deck.size() - k + i; i--) {
+					if(i < 0) {
+						return subsets;
+					}
+					s[i]++;
+					for(++i; i < k; i++) {
+						subsets.add(getSubset(deck, s));
+					}
+				}
+			}
+			
+		} */
+		
+		
+		public void generateAllCC(ArrayList<Integer> arr, Integer data[], 
+				int start, int end, int index, int r,
+				TypeFTR combinations, Integer c1, 
+				Integer c2, Integer c3, Integer c4) {
+			
+			if(index == r) {
+				/*if(tracker == 1712303-1) {
+					System.out.println("--------------------------------------------------------------");
+					printCard(combinations.get(0)[0]);
+					printCard(combinations.get(0)[1]);
+					printCard(combinations.get(0)[2]);
+					printCard(combinations.get(0)[3]);
+					printCard(combinations.get(0)[4]);
+					
+
+				}*/
+				
+				
+				/*if(95 < tracker&& tracker < 100 ) {
+					System.out.println("generateAllCC: adding hand");
+					for(Integer c : data) {
+						printCard(c);
+					}
+				}*/
+				tracker++; 
+				int player1Rank = getStrongestHandRank(setFiveCardHands(c1, c2, data[0], data[1], data[2], data[3], data[4]));
+				int player2Rank = getStrongestHandRank(setFiveCardHands(c3, c4, data[0], data[1], data[2], data[3], data[4]));
+				if(player1Rank < player2Rank) {
+					player1Wins++;
+				}
+				else if(player2Rank < player1Rank) {
+					player2Wins++;
+				}
+				combinations.add(data);
 				return;
 			}
 			
-			for(int i = start; i<=end && end-i+i >= target - index; i++) {
-				cards5[index] = deck.get(i);
-				generateAllCC(deck, combinations, cards5, start, end, index, target);
+			for  (int i=start; i<=end && end-i+1 >= r-index; i++) {
+				//System.out.println("Index:" + index + " i:" +i);
+				data[index] = arr.get(i);
+				generateAllCC(arr, data, i+1, end, index+1, r, combinations, c1, c2, c3, c4);
 			}
+		}
+		
+			
+		
+		//this function will take in hands from players
+		//and a list of all FTR
+		//it will then keep track of how many FTR each players wins
+		//and will return the win% of the first player given
+		public Double  caclEquity(ArrayList<Integer[]> cards5, Integer c1, Integer c2, Integer c3, Integer c4 ) {
+			int player1Wins = 0;
+			int player2Wins = 0;
+			int totalRuns = 0;
+			int player1Rank, player2Rank;
+			
+
+			
+			for(int i =0; i< cards5.size(); i++) {
+				Integer[] temp = cards5.get(i);
+				
+				/*
+				if(i < 5) {
+					int p = 0;
+					System.out.println("Printing --------:");
+					for(Integer c: temp)
+					{
+						System.out.println("Card:" + p++);
+						printCard(c);
+					}
+					System.out.println("");
+				}*/
+
+				
+
+				player1Rank = getStrongestHandRank(setFiveCardHands(c1, c2, temp[0], temp[1], temp[2], temp[3], temp[4]));
+				player2Rank = getStrongestHandRank(setFiveCardHands(c3, c4, temp[0], temp[1], temp[2], temp[3], temp[4]));
+
+				/*
+				System.out.println("Player 1 rank:" + player1Rank);
+				System.out.println("Player 2 rank:" + player2Rank);
+				*/
+				
+				if(player1Rank < player2Rank) {
+					player1Wins++;
+				}
+				else if(player2Rank < player1Rank) {
+					player2Wins++;
+				}
+				totalRuns++;
+			}
+			System.out.println("Player 1 number of wins:" + player1Wins + " " +totalRuns);
+			System.out.println("Player 2 number of wins:" + player2Wins);
+
+			
+			System.out.println("Player 1 win %:" + Double.valueOf(player1Wins)/Double.valueOf(totalRuns));
+			System.out.println("Player 2 win %:" + Double.valueOf(player2Wins)/Double.valueOf(totalRuns));
+
+			return Double.valueOf(player1Wins)/Double.valueOf(totalRuns);
 			
 		}
+		
+		public ArrayList<ArrayList<Integer>> setFiveCardHands(Integer c1, Integer c2, Integer c3, Integer c4, Integer c5, Integer c6, Integer c7) {
+			ArrayList<Integer> sevenCards = new ArrayList<Integer>();
+			ArrayList<ArrayList<Integer>> fiveCardHands = new ArrayList<ArrayList<Integer>>();
+			sevenCards.add(c1);
+			sevenCards.add(c2);
+			sevenCards.add(c3);
+			sevenCards.add(c4);
+			sevenCards.add(c5);
+			sevenCards.add(c6);
+			sevenCards.add(c7);
+			//System.out.println("7777777777777777777:");
+			//printOneHand(sevenCards);
+			
+			for(int i = 0; i < 21; i++) {
+				ArrayList<Integer> hand = new ArrayList<Integer>();
+
+				for(int j =0; j < 5; j++) {				
+					hand.add(sevenCards.get(perm7[i][j]));
+					//System.out.println("Perm7:" + );
+
+				}
+
+				//System.out.println("Printing hand:");
+				//printOneHand(hand);
+
+				fiveCardHands.add(hand);
+			}
+			return fiveCardHands;
+		}
+		
+		public void printOneHand(ArrayList<Integer> hand) {
+			for(Integer i : hand)
+			{
+				printCard(i);
+			}
+		}
+		
+		public int perm7[][] =
+			{
+				    { 0, 1, 2, 3, 4 },
+				    { 0, 1, 2, 3, 5 },
+				    { 0, 1, 2, 3, 6 },
+				    { 0, 1, 2, 4, 5 },
+				    { 0, 1, 2, 4, 6 },
+				    { 0, 1, 2, 5, 6 },
+				    { 0, 1, 3, 4, 5 },
+				    { 0, 1, 3, 4, 6 },
+				    { 0, 1, 3, 5, 6 },
+				    { 0, 1, 4, 5, 6 },
+				    { 0, 2, 3, 4, 5 },
+				    { 0, 2, 3, 4, 6 },
+				    { 0, 2, 3, 5, 6 },
+				    { 0, 2, 4, 5, 6 },
+				    { 0, 3, 4, 5, 6 },
+				    { 1, 2, 3, 4, 5 },
+				    { 1, 2, 3, 4, 6 },
+				    { 1, 2, 3, 5, 6 },
+				    { 1, 2, 4, 5, 6 },
+				    { 1, 3, 4, 5, 6 },
+				    { 2, 3, 4, 5, 6 }
+				};
+
 		
 		public int products[] = 
 		{

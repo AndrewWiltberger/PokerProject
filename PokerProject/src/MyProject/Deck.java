@@ -54,7 +54,6 @@ public class Deck {
 	}
 	
 	public Integer toFormat(String rankS, String suitS) {
-		System.out.println("Rank:" + rankS + " Suit:" +suitS );
 		return makeCard(Arrays.asList(ranksString).indexOf(rankS),
 				Arrays.asList(suitsString).indexOf(suitS));
 	}

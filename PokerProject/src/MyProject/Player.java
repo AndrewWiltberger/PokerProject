@@ -1,6 +1,7 @@
 package MyProject;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Player {
 	public int position;
@@ -159,7 +160,30 @@ public class Player {
 		handRank = r;
 	}
 	
-	//
+	//function to capture card ranks from user input
+	//pretty sure this has a memory leak but idgaf
+	public void select2Cards(Deck d) {
+		Scanner reader1 = new Scanner(System.in);
+		
+		System.out.println("Set Player " + position +  "'s cards: ");
+		int k =1;
+		while(k < 3) {
+			System.out.print("Enter card " + k + ":");
+			String card = reader1.nextLine();
+			
+			String cardSuit = card.substring(card.length() -1);
+			card = card.substring(0, card.length() - 1);
+			Integer cardBinary = d.toFormat(card, cardSuit);
+			if(d.pickCard(cardBinary)) {
+				setCard(cardBinary, k);
+				k++;
+			}
+			else {
+				System.out.println("That card is not in the deck please select another one");
+			}
+		}
+		//reader1.close();
+	}
 		
 	
 	
