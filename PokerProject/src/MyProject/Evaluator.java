@@ -59,6 +59,7 @@ public class Evaluator {
 		
 		//this will evaluate the rank of 5 cards;
 		public int evaluate(ArrayList<Integer> fiveCards) {
+			tracker++;
 			if(fiveCards.size() != 5) {
 				System.out.println("Error expecting 5 cards...");
 				return 0;

@@ -8,7 +8,7 @@ import java.util.*;
 public class Deck {
 	public ArrayList<Integer> cards = new ArrayList<Integer>();
 	public int ranks[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-	public String ranksString[] = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+	public String ranksString[] = {"2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"};
 	public int ranksM[]= { 
 						65536, 131072, 262144,524288,
 						1048576,2097152,4194304,8388608,
@@ -16,7 +16,7 @@ public class Deck {
 	public int primeRanks[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41};
 	//[0]=c, [1]=d, [2]=h, [3]=s
 	public int suit[] = {8, 4, 2, 1};
-	public String suitsString[] = {"C", "D", "H", "S"};
+	public String suitsString[] = {"c", "d", "h", "s"};
 		
 	public Deck() {
 		for(int i = 0; i < suit.length; i++) {
