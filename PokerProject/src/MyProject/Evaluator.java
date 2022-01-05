@@ -243,8 +243,14 @@ public class Evaluator {
 						printCard(c);
 					}
 				}*/
+				Integer[] hands1 = {c1, c2, data[0], data[1], data[2], data[3], data[4]};
+				Integer[] hands2 = {c3, c4, data[0], data[1], data[2], data[3], data[4]};
+				/*
 				int player1Rank = getStrongestHandRank(setFiveCardHands(c1, c2, data[0], data[1], data[2], data[3], data[4]));
 				int player2Rank = getStrongestHandRank(setFiveCardHands(c3, c4, data[0], data[1], data[2], data[3], data[4]));
+				*/
+				int player1Rank = getRankFrom7(hands1);
+				int player2Rank = getRankFrom7(hands2);
 				if(player1Rank < player2Rank) {
 					player1Wins++;
 				}

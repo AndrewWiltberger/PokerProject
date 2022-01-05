@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
@@ -17,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.plaf.DimensionUIResource;
 
@@ -28,7 +31,7 @@ public class MyFrame extends JFrame implements ActionListener{
 	JButton turnButton;
 	JButton riverButton;
 
-
+    public static final DecimalFormat df = new DecimalFormat("0.00");
 	
 	JLabel label;
 	JTextField text1;
@@ -42,8 +45,11 @@ public class MyFrame extends JFrame implements ActionListener{
 	JPanel resultsFrame;
 	JTextField results1;
 	JTextField results2;
+	JTextField ties;
+
 	JTextField iterationsResults;
 
+	ArrayList<JTextField> textList = new ArrayList<JTextField>();
 
 
 	
@@ -67,6 +73,8 @@ public class MyFrame extends JFrame implements ActionListener{
 	Boolean isFlop = false;
 	Boolean isTurn = false;
 	Boolean isRiver = false;
+	Boolean isPlayer1 = false;
+	Boolean isPlayer2 = false;
 
 	
 
@@ -80,12 +88,12 @@ public class MyFrame extends JFrame implements ActionListener{
 		button.setText("Select Player 1 Cards");
 		button.setFocusable(false);
 		
-		borderRed = BorderFactory.createLineBorder(Color.RED, 1);
-        borderGreen = BorderFactory.createLineBorder(Color.GREEN, 1);
+		borderRed = BorderFactory.createLineBorder(new Color(186, 13, 13), 1);
+        borderGreen = BorderFactory.createLineBorder(new Color(2, 171, 75), 1);
         borderBlack = BorderFactory.createLineBorder(Color.BLACK, 1);
 
 		
-		
+
 		button1 = new JButton();
 		button1.setBounds(100, 100, 175, 50);
 		button1.addActionListener(this);
@@ -119,46 +127,55 @@ public class MyFrame extends JFrame implements ActionListener{
 		
 		textFlop =new JTextField();
 		textFlop.setPreferredSize(new Dimension(250, 40));
-		//textFlop.setBorder(borderBlack);
 		textFlop.setBounds(150, 250, 250, 40);
+		textList.add(textFlop);
 		
 		textTurn =new JTextField();
 		textTurn.setPreferredSize(new Dimension(250, 40));
-		//textTurn.setBorder(borderBlack);
 		textTurn.setBounds(150, 250, 250, 40);
+		textList.add(textTurn);
+
 
 		textRiver =new JTextField();
 		textRiver.setPreferredSize(new Dimension(250, 40));
-		//textRiver.setBorder(borderBlack);
 		textRiver.setBounds(150, 250, 250, 40);
+		textList.add(textRiver);
 
 		
 				
 		text1 = new JTextField();
-		//text1.setPreferredSize(new Dimension(250, 40));
-		//text1.setBorder(borderBlack);
 		text1.setBounds(500, 500, 250, 40);
-		
+		textList.add(text1);
+
 
 		text2 = new JTextField();
 		text2.setPreferredSize(new Dimension(250, 40));
-		//text2.setBorder(borderBlack);
-		text1.setBounds(150, 250, 250, 40);
+		text2.setBounds(150, 250, 250, 40);
+		textList.add(text2);
+
 		
 		results1 = new JTextField();
 		//results1.setBorder(borderBlack);
 		results1.setBounds(150, 250, 250, 40);
+		textList.add(results1);
+
 
 		
 		results2 = new JTextField();
 		//results2.setBorder(borderBlack);
 		results2.setBounds(150, 250, 250, 40);
+		textList.add(results2);
+
+		ties = new JTextField();
+		ties.setBounds(150, 250, 250, 40);
+		textList.add(ties);
 		
 		resultsFrame = new JPanel();
 		resultsFrame.setLayout(new GridLayout(2,1));
 		resultsFrame.add(results1);
+		resultsFrame.add(ties);
 		resultsFrame.add(results2);
-
+		
 
 		
         
@@ -167,7 +184,7 @@ public class MyFrame extends JFrame implements ActionListener{
 		
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //exit program on close 
-		this.setSize(500, 250); //set x and y dims of frame 
+		this.setSize(600, 325); //set x and y dims of frame 
 		this.add(button);
 		this.add(text1);
 		this.add(button1);
@@ -205,29 +222,40 @@ public class MyFrame extends JFrame implements ActionListener{
 			if(!p1.selectCardsFromString(d, text1.getText())) {
 				text1.setBorder(borderRed);
 				System.out.println("RED");
+				isPlayer1 = false;
+
 			} else {
 				text1.setBorder(borderGreen);
 				System.out.println("GREEN");
+				isPlayer1 = true;
+
 			}
 		}
-		if(e.getSource()==button1) {
+		else if(e.getSource()==button1) {
 			System.out.println("Player 2 Cards Selected:" + text2.getText());
 			
 			if(!p2.selectCardsFromString(d, text2.getText())) {
 				text2.setBorder(borderRed);
 				System.out.println("RED");
+				isPlayer2 = false;
+
 			} else {
 				text2.setBorder(borderGreen);
 				System.out.println("GREEN");
+				isPlayer2 = true;
+
 			}
 		}
-
-		if(e.getSource()==button2) {
+		else if(e.getSource()==button2 && isPlayer1 && isPlayer2) {
+			clearResults();
 			TypeFTR typeFTR = new TypeFTR();
 			Double totalRuns;
 			Integer[] playerCards = {p1.c1, p1.c2, p2.c1, p2.c2};
 
+
 			if(isRiver) {
+				System.out.println("Calculating equity...");
+
 				Integer[] cards1 = {p1.c1, p1.c2, evaluator.flop[0], evaluator.flop[1], 
 									evaluator.flop[2], evaluator.turn, evaluator.river};
 				Integer[] cards2 = {p2.c1, p2.c2, evaluator.flop[0], evaluator.flop[1], 
@@ -253,6 +281,7 @@ public class MyFrame extends JFrame implements ActionListener{
 
 			}
 			else if(isTurn) {
+				System.out.println("Calculating equity over all rivers...");
 				evaluator.generateAllR(d.getCards(), playerCards);
 				totalRuns = evaluator.player1Wins + evaluator.player2Wins + evaluator.Ties;
 				evaluator.tracker = 0;
@@ -288,25 +317,39 @@ public class MyFrame extends JFrame implements ActionListener{
 
 			//System.out.println("Time taken:" + duration/1000.0 + " seconds");
 
-			double eq1 = evaluator.player1Wins / totalRuns * 100;
+			double eq1 = evaluator.player1Wins / totalRuns * 100.0;
 			double eq2 = evaluator.player2Wins / totalRuns * 100;
+			double eqTies = evaluator.Ties / totalRuns * 100;
 			
 			System.out.println("Player 1 equity:" + eq1);
 			System.out.println("Player 2 equity:" + eq2);
-			results1.setText("Player 1 Equity:" + String.valueOf(eq1) + "%");
-			results2.setText("Player 2 Equity:" + String.valueOf(eq2) + "%");
+			results1.setText("Player 1 Equity:" + df.format(eq1) + "%");
+			results2.setText("Player 2 Equity:" + df.format(eq2) + "%");
+			ties.setText("Ties:" + df.format(eqTies) + "%");
 			evaluator.player1Wins = 0;
 			evaluator.player2Wins = 0;
 			evaluator.Ties = 0;
 
 			d = new Deck();
+			p1 = new Player(1);
+			p2 = new Player(2);
+			evaluator = new Evaluator();
+			for(JTextField t : textList) {
+				t.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
+			}
+			
+			isFlop = false;
+			isTurn = false;
+			isRiver = false;
+			isPlayer1 = false;
+			isPlayer2 = false;
 
 			//evaluating
 		}
-		
-		if(e.getSource()==flopButton) {
+		else if(e.getSource()==flopButton) {
 			if(!evaluator.setFlop(textFlop.getText(), d)) {
 				textFlop.setBorder(borderRed);
+				isFlop = false;
 			}
 			else {
 				textFlop.setBorder(borderGreen);
@@ -314,24 +357,33 @@ public class MyFrame extends JFrame implements ActionListener{
 			}
 			
 		}
-		if(e.getSource()==turnButton) {
+		else if(e.getSource()==turnButton && isFlop) {
 			if(!evaluator.setTurn(textTurn.getText(), d)) {
 				textTurn.setBorder(borderRed);
+				isTurn = false;
 			}
 			else {
 				textTurn.setBorder(borderGreen);
 				isTurn = true;
 			}
 		}
-		if(e.getSource()==riverButton) {
+		else if(e.getSource()==riverButton && isTurn) {
 			if(!evaluator.setRiver(textRiver.getText(), d)) {
 				textRiver.setBorder(borderRed);
+				isRiver = false;
 			}
 			else {
 				textRiver.setBorder(borderGreen);
 				isRiver = true;
 			}
 		}
+
+	}
+	
+	public void clearResults() {
+		System.out.println("----------------clearing-------------");
+		results1.setText(" bro wtf");
+		results2.setText(" asdasdasdasdasd");
 
 	}
 }

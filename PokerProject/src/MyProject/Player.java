@@ -186,6 +186,7 @@ public class Player {
 	}
 	
 	public Boolean selectCardsFromString(Deck d, String inputHand) {		
+		if(inputHand.length() != 4) return false;
 		char cardRank1 = inputHand.charAt(0);
 		char cardSuit1 = inputHand.charAt(1);
 		
