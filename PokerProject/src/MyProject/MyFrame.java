@@ -25,11 +25,19 @@ public class MyFrame extends JFrame implements ActionListener{
 	JButton button1;
 	JButton button2;
 	JButton flopButton;
+	JButton turnButton;
+	JButton riverButton;
+
+
 	
 	JLabel label;
 	JTextField text1;
 	JTextField text2;
 	JTextField textFlop;
+	JTextField textTurn;
+	JTextField textRiver;
+
+
 	
 	JPanel resultsFrame;
 	JTextField results1;
@@ -72,6 +80,10 @@ public class MyFrame extends JFrame implements ActionListener{
 		button.setText("Select Player 1 Cards");
 		button.setFocusable(false);
 		
+		borderRed = BorderFactory.createLineBorder(Color.RED, 1);
+        borderGreen = BorderFactory.createLineBorder(Color.GREEN, 1);
+        borderBlack = BorderFactory.createLineBorder(Color.BLACK, 1);
+
 		
 		
 		button1 = new JButton();
@@ -93,33 +105,53 @@ public class MyFrame extends JFrame implements ActionListener{
 		flopButton.setText("Set Flop Cards:");
 		flopButton.setFocusable(false);
 		
+		turnButton = new JButton();
+		turnButton.setBounds(100, 175, 175, 50);
+		turnButton.addActionListener(this);
+		turnButton.setText("Set Turn Card:");
+		turnButton.setFocusable(false);
+		
+		riverButton = new JButton();
+		riverButton.setBounds(100, 175, 175, 50);
+		riverButton.addActionListener(this);
+		riverButton.setText("Set River Card:");
+		riverButton.setFocusable(false);
+		
 		textFlop =new JTextField();
 		textFlop.setPreferredSize(new Dimension(250, 40));
-		textFlop.setBorder(borderBlack);
+		//textFlop.setBorder(borderBlack);
 		textFlop.setBounds(150, 250, 250, 40);
 		
-		borderRed = BorderFactory.createLineBorder(Color.RED, 2);
-        borderGreen = BorderFactory.createLineBorder(Color.GREEN, 2);
-        borderBlack = BorderFactory.createLineBorder(Color.BLACK, 2);
+		textTurn =new JTextField();
+		textTurn.setPreferredSize(new Dimension(250, 40));
+		//textTurn.setBorder(borderBlack);
+		textTurn.setBounds(150, 250, 250, 40);
+
+		textRiver =new JTextField();
+		textRiver.setPreferredSize(new Dimension(250, 40));
+		//textRiver.setBorder(borderBlack);
+		textRiver.setBounds(150, 250, 250, 40);
+
 		
+				
 		text1 = new JTextField();
 		//text1.setPreferredSize(new Dimension(250, 40));
-		text1.setBorder(borderBlack);
+		//text1.setBorder(borderBlack);
 		text1.setBounds(500, 500, 250, 40);
 		
 
 		text2 = new JTextField();
 		text2.setPreferredSize(new Dimension(250, 40));
-		text2.setBorder(borderBlack);
+		//text2.setBorder(borderBlack);
 		text1.setBounds(150, 250, 250, 40);
 		
 		results1 = new JTextField();
-		results1.setBorder(borderBlack);
+		//results1.setBorder(borderBlack);
 		results1.setBounds(150, 250, 250, 40);
 
 		
 		results2 = new JTextField();
-		results2.setBorder(borderBlack);
+		//results2.setBorder(borderBlack);
 		results2.setBounds(150, 250, 250, 40);
 		
 		resultsFrame = new JPanel();
@@ -142,9 +174,13 @@ public class MyFrame extends JFrame implements ActionListener{
 		this.add(text2);
 		this.add(flopButton);
 		this.add(textFlop);
+		this.add(turnButton);
+		this.add(textTurn);
+		this.add(riverButton);
+		this.add(textRiver);
 		this.add(button2);
 		this.add(resultsFrame);
-		this.setLayout(new GridLayout(4,2));
+		this.setLayout(new GridLayout(6,2));
 
 		//this.pack();
 		this.setVisible(true);	//make frame visible
@@ -189,12 +225,35 @@ public class MyFrame extends JFrame implements ActionListener{
 		if(e.getSource()==button2) {
 			TypeFTR typeFTR = new TypeFTR();
 			Double totalRuns;
+			Integer[] playerCards = {p1.c1, p1.c2, p2.c1, p2.c2};
+
 			if(isRiver) {
-				totalRuns = evaluator.player1Wins + evaluator.player2Wins + evaluator.Ties;
+				Integer[] cards1 = {p1.c1, p1.c2, evaluator.flop[0], evaluator.flop[1], 
+									evaluator.flop[2], evaluator.turn, evaluator.river};
+				Integer[] cards2 = {p2.c1, p2.c2, evaluator.flop[0], evaluator.flop[1], 
+									evaluator.flop[2], evaluator.turn, evaluator.river};
+				
+				int rank1 = evaluator.getRankFrom7(cards1);
+				int rank2 = evaluator.getRankFrom7(cards2);
+
+				if(rank1 == rank2) {
+					evaluator.player1Wins = 1;
+					evaluator.player2Wins = 1;
+				}
+				else if(rank1 < rank2) {
+					evaluator.player1Wins = 2;
+					evaluator.player2Wins = 0;
+				}
+				else if(rank1 > rank2) {
+					evaluator.player1Wins = 0;
+					evaluator.player2Wins = 2;
+				}
+				totalRuns = 2.0;
 				evaluator.tracker = 0;
 
 			}
 			else if(isTurn) {
+				evaluator.generateAllR(d.getCards(), playerCards);
 				totalRuns = evaluator.player1Wins + evaluator.player2Wins + evaluator.Ties;
 				evaluator.tracker = 0;
 
@@ -203,7 +262,6 @@ public class MyFrame extends JFrame implements ActionListener{
 				System.out.println("Calculating equity over all turns and rivers...");
 
 				//evals all turns and rivers given a flop and 2 hands
-				Integer[] playerCards = {p1.c1, p1.c2, p2.c1, p2.c2};
 				System.out.println("Cards:" + d.getCards().size()+ " Player cards:" + playerCards.length);
 				/*
 				 * 
@@ -235,8 +293,8 @@ public class MyFrame extends JFrame implements ActionListener{
 			
 			System.out.println("Player 1 equity:" + eq1);
 			System.out.println("Player 2 equity:" + eq2);
-			results1.setText(String.valueOf(eq1) + "%");
-			results2.setText(String.valueOf(eq2) + "%");
+			results1.setText("Player 1 Equity:" + String.valueOf(eq1) + "%");
+			results2.setText("Player 2 Equity:" + String.valueOf(eq2) + "%");
 			evaluator.player1Wins = 0;
 			evaluator.player2Wins = 0;
 			evaluator.Ties = 0;
@@ -255,6 +313,24 @@ public class MyFrame extends JFrame implements ActionListener{
 				isFlop = true;
 			}
 			
+		}
+		if(e.getSource()==turnButton) {
+			if(!evaluator.setTurn(textTurn.getText(), d)) {
+				textTurn.setBorder(borderRed);
+			}
+			else {
+				textTurn.setBorder(borderGreen);
+				isTurn = true;
+			}
+		}
+		if(e.getSource()==riverButton) {
+			if(!evaluator.setRiver(textRiver.getText(), d)) {
+				textRiver.setBorder(borderRed);
+			}
+			else {
+				textRiver.setBorder(borderGreen);
+				isRiver = true;
+			}
 		}
 
 	}

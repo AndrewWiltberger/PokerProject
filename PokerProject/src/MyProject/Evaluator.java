@@ -45,6 +45,8 @@ public class Evaluator {
 		}
 		
 		//take in a string of 3 cards
+		//return true if the cards are a vaild flop
+		//also removes delt cards from deck
 		public Boolean setFlop(String flopInput, Deck d) {
 			if(flopInput.length() != 6 ) return false;
 			int[] rankIndex = {0, 2, 4};
@@ -70,11 +72,44 @@ public class Evaluator {
 			 * 
 			 * for testing
 			 */
+			System.out.println("Flop:");
 			for(Integer i : flop) {
 				printCard(i);
 			}
-			return true;
-			
+			return true;	
+		}
+		
+		//sets turn card if the card is valid
+		Boolean setTurn(String turnInput, Deck d) {
+			if(turnInput.length() != 2 ) return false;
+			Integer temp = Player.select1CardFromString(d, turnInput);
+			if(temp != -1) {
+				turn = temp;
+				System.out.println("Turn:");
+				printCard(turn);
+				return true;
+			}
+			else if(temp == -1) {
+				return false;
+			}
+			return false;
+		}
+		
+		//sets turn River if the card is valid
+		Boolean setRiver(String riverInput, Deck d) {
+			if(riverInput.length() != 2 ) return false;
+			Integer temp = Player.select1CardFromString(d, riverInput);
+			if(temp != -1) {
+				river = temp;
+				System.out.println("River:");
+				printCard(river);
+
+				return true;
+			}
+			else if(temp == -1) {
+				return false;
+			}
+			return false;
 		}
 		
 		//will just return the rank of the best hand
@@ -274,6 +309,35 @@ public class Evaluator {
 				generateAllTR(arr, data, i+1, end, index+1, r, playerHands);
 			}
 		}
+		
+		public void generateAllR(ArrayList<Integer> arr, Integer[] playerHands) {
+			for(int i = 0; i < arr.size(); i++) {
+				Integer[] hands1 = {playerHands[0], playerHands[1], flop[0], flop[1], flop[2], turn, arr.get(i)};
+				Integer[] hands2 = {playerHands[2], playerHands[3], flop[0], flop[1], flop[2], turn, arr.get(i)};
+
+				int player1Rank = getRankFrom7(hands1);
+				int player2Rank = getRankFrom7(hands2);	
+				
+				System.out.println("Player 1 rank->" + player1Rank);
+				System.out.println("Player 2 rank->" + player2Rank);
+
+				if(player1Rank < player2Rank) {
+					System.out.println("1-------------------------");
+
+					player1Wins++;
+				}
+				else if(player2Rank < player1Rank) {
+					System.out.println("2-------------------------");
+
+					player2Wins++;
+				}
+				else {
+					Ties++;
+				}
+				
+			}
+		}
+		
 		
 			
 		
