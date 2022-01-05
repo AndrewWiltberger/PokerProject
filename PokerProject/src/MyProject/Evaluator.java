@@ -15,9 +15,13 @@ public class Evaluator {
 	public int tracker = 0;
 	public double player1Wins = 0;
 	public double player2Wins = 0;
-	
+	public double Ties = 0;
 
+	Integer[] flop = new Integer[3];
+	Integer turn;
+	Integer river;
 	
+		
 	//will evaluate all 21 hand
 	//returns arraylist [0] = index of strongest hand in fiveCardHands
 	//[1] = the rank of that hand
@@ -40,6 +44,39 @@ public class Evaluator {
 			return ans;			
 		}
 		
+		//take in a string of 3 cards
+		public Boolean setFlop(String flopInput, Deck d) {
+			if(flopInput.length() != 6 ) return false;
+			int[] rankIndex = {0, 2, 4};
+			int[] suitIndex = {1, 3, 5};
+			for(int i = 0; i < 3; i++) {
+				Integer temp = Player.select1CardFromString(
+						d,
+						Character.toString(flopInput.charAt(rankIndex[i])) +
+						Character.toString(flopInput.charAt(suitIndex[i]))
+						);
+				if(temp != -1) {
+					 flop[i] = temp;
+				}else if(temp == -1) {
+					//if the flop fails we need to return
+					//any cards we delt already 
+					for(int j = i -1; j >= 0; j --) {
+						d.returnCard(flop[j]);
+					}
+					return false;
+				}
+			}
+			/*
+			 * 
+			 * for testing
+			 */
+			for(Integer i : flop) {
+				printCard(i);
+			}
+			return true;
+			
+		}
+		
 		//will just return the rank of the best hand
 		public int getStrongestHandRank(ArrayList<ArrayList<Integer>> fiveCardHands) {
 			int temp;
@@ -56,6 +93,9 @@ public class Evaluator {
 			//System.out.println("Best Rank" + maxRank);
 			return maxRank;			
 		}
+		
+		//evaluate7
+
 		
 		//this will evaluate the rank of 5 cards;
 		public int evaluate(ArrayList<Integer> fiveCards) {
@@ -142,43 +182,7 @@ public class Evaluator {
 	            return true;
 			else
 				return false;
-		}
-		
-		//
-		//function that put all possible combinations of 
-		//community cards in combinations arraylist
-		//uses recusion to generate all combinations
-		//
-		//deck is remaing cards in deck
-		//https://stackoverflow.com/questions/29910312/algorithm-to-get-all-the-combinations-of-size-n-from-an-array-java
-		//
-		/*
-		public ArrayList<Integer[]> generateAllCC(ArrayList<Integer> deck, int k) {
-			ArrayList<Integer[]> subsets = new ArrayList<Integer[]>();
-			
-			Integer[] s = new Integer[k];
-			//pick first index of combo
-			for(int i = 0; (s[i] = i) < k-1; i++) {
-				
-			}
-			
-			subsets.add(getSubset(deck, s));
-			for(;;) {
-				int i;
-				//find position to inc
-				for(i = k - 1; i >= 0 && s[i] == deck.size() - k + i; i--) {
-					if(i < 0) {
-						return subsets;
-					}
-					s[i]++;
-					for(++i; i < k; i++) {
-						subsets.add(getSubset(deck, s));
-					}
-				}
-			}
-			
-		} */
-		
+		}		
 		
 		public void generateAllCC(ArrayList<Integer> arr, Integer data[], 
 				int start, int end, int index, int r,
@@ -204,7 +208,6 @@ public class Evaluator {
 						printCard(c);
 					}
 				}*/
-				tracker++; 
 				int player1Rank = getStrongestHandRank(setFiveCardHands(c1, c2, data[0], data[1], data[2], data[3], data[4]));
 				int player2Rank = getStrongestHandRank(setFiveCardHands(c3, c4, data[0], data[1], data[2], data[3], data[4]));
 				if(player1Rank < player2Rank) {
@@ -213,14 +216,62 @@ public class Evaluator {
 				else if(player2Rank < player1Rank) {
 					player2Wins++;
 				}
-				combinations.add(data);
+				else {
+					Ties++;
+				}
+				//combinations.add(data);
 				return;
 			}
 			
-			for  (int i=start; i<=end && end-i+1 >= r-index; i++) {
+			for(int i=start; i<=end && end-i+1 >= r-index; i++) {
 				//System.out.println("Index:" + index + " i:" +i);
 				data[index] = arr.get(i);
 				generateAllCC(arr, data, i+1, end, index+1, r, combinations, c1, c2, c3, c4);
+			}
+		}
+		
+		//flop cards store in the flop gobal array 
+		public void generateAllTR(ArrayList<Integer> arr, Integer data[], 
+				int start, int end, int index, int r, Integer[] playerHands) {
+			int flopSize = 3;
+			int handSize = playerHands.length;
+			
+			if(index == r) {
+				/*
+				 * 
+				 */
+				
+				
+				//tracker++; 
+
+				Integer[] hands1 = {playerHands[0], playerHands[1], flop[0], flop[1], flop[2], data[0], data[1] };
+				Integer[] hands2 = {playerHands[2], playerHands[3], flop[0], flop[1], flop[2], data[0], data[1] };
+
+				int player1Rank = getRankFrom7(hands1);
+				int player2Rank = getRankFrom7(hands2);				
+
+				System.out.println("Player 1 rank->" + player1Rank);
+				System.out.println("Player 2 rank->" + player2Rank);
+
+				if(player1Rank < player2Rank) {
+					System.out.println("1-------------------------");
+
+					player1Wins++;
+				}
+				else if(player2Rank < player1Rank) {
+					System.out.println("2-------------------------");
+
+					player2Wins++;
+				}
+				else {
+					Ties++;
+				}
+				return;
+			}
+			for(int i=start; i<=end && end-i+1 >= r-index; i++) {
+				//System.out.println("Index:" + index + " i:" +i);
+				data[index] = arr.get(i);
+				generateAllTR(arr, data, i+1, end, index+1, r, playerHands);
 			}
 		}
 		
@@ -280,6 +331,25 @@ public class Evaluator {
 
 			return Double.valueOf(player1Wins)/Double.valueOf(totalRuns);
 			
+		}
+		
+		/*
+		 * this function takes in 7 cards and returns the rank of the strongest hand
+		 */
+		public int getRankFrom7(Integer[] cards) {
+			int bestRank = Integer.MAX_VALUE;
+			for(int i = 0; i < 21; i++) {
+				ArrayList<Integer> hand = new ArrayList<Integer>(5);
+				for(int j = 0; j < 5; j++) {
+					hand.add(cards[perm7[i][j]]);
+					
+				}
+				int temp = evaluate(hand);
+				if(temp == 1) return 1;
+				if(temp < bestRank) bestRank = temp;
+				
+			}
+			return bestRank;
 		}
 		
 		public ArrayList<ArrayList<Integer>> setFiveCardHands(Integer c1, Integer c2, Integer c3, Integer c4, Integer c5, Integer c6, Integer c7) {

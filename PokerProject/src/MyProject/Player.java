@@ -184,6 +184,57 @@ public class Player {
 		}
 		//reader1.close();
 	}
+	
+	public Boolean selectCardsFromString(Deck d, String inputHand) {		
+		char cardRank1 = inputHand.charAt(0);
+		char cardSuit1 = inputHand.charAt(1);
+		
+		char cardRank2 = inputHand.charAt(2);
+		char cardSuit2 = inputHand.charAt(3);
+		Integer cardBinary1;
+		Integer cardBinary2;
+		
+		try {
+			cardBinary1 = d.toFormat(String.valueOf(cardRank1), String.valueOf(cardSuit1));
+			cardBinary2 = d.toFormat(String.valueOf(cardRank2), String.valueOf(cardSuit2));
+
+		} catch(Exception e) {
+			return false;
+			
+		}
+		
+		if(!d.pick2Cards(cardBinary1, cardBinary2)) {
+			return false;
+		}
+		setCard(cardBinary1, 1);
+		setCard(cardBinary2, 2);
+		//String cardSuit = inputHand[1];
+		return true;
+
+	}
+	
+	
+	//function takes in a string and 
+	//returns the Integer format of card if
+	//valid (in deck/real card) 
+	//return -1 if the card is invalid
+	public static Integer select1CardFromString(Deck d, String inputCard) {
+		char cardRank1 = inputCard.charAt(0);
+		char cardSuit1 = inputCard.charAt(1);
+		Integer cardBinary1;
+
+		
+		try {
+			cardBinary1 = d.toFormat(String.valueOf(cardRank1), String.valueOf(cardSuit1));
+		} catch(Exception e) {
+			return -1;
+		}
+		if(d.pickCard(cardBinary1)) {
+			return cardBinary1;
+		}
+		return -1;
+	}
+
 		
 	
 	

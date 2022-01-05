@@ -61,6 +61,7 @@ public class Deck {
 	public Integer DealCard() {
 		Integer i = cards.get(0);
 		cards.remove(0);
+		System.out.println("DEALING CARD");
 		return i;
 	}
 	
@@ -71,12 +72,44 @@ public class Deck {
 	//need cannot use it
 	public Boolean pickCard(Integer target) {
 		if(cards.indexOf(target) != -1) {
+			System.out.println("PICKING CARD");
+
 			cards.remove(target);
 			return true;
 		}
 		return false;
 	}
 	
+	public void returnCard(Integer target) {
+		if(cards.indexOf(target) == -1) {
+			cards.add(target);
+		}
+	}
+	
+	public Boolean pick2Cards(Integer c1, Integer c2) {
+		if(cards.indexOf(c1) != -1 && cards.indexOf(c2) != -1) {
+			cards.remove(c1);
+			if(cards.indexOf(c2) != -1) {
+				cards.remove(c2);
+				return true;
+			}
+			else {
+				cards.add(c1);
+				return false;
+			}
+		}
+		return false;
+	}
+	
+	//takes in a string 
+	public Boolean dealFlop(String flopString, Evaluator e) {
+		if(flopString.length() != 6) return false;
+		
+		e.flop[0] = flopString.charAt(0) + flopString.charAt(1);
+		
+		return true;
+	}
+		
 	
 	public void ShuffleCards() {
         Collections.shuffle(cards);
